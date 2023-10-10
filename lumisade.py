@@ -17,7 +17,7 @@ class Hiutale:
         self.putoaa = True
         self.laskeutunut = False  # Onko laskeutunut
 
-    def paivita(self, maa, hiutaleet):
+    def paivita(self, maa, hiutaleet, lahjapaketit):
         if self.putoaa:
             self.y += self.y_nopeus
             self.x += self.x_nopeus
@@ -39,8 +39,41 @@ class Hiutale:
                 self.putoaa = False
                 self.laskeutunut = True
 
+            for lahjapaketti in lahjapaketit:
+                if (
+                    self.x + self.sade >= lahjapaketti.x
+                    and self.x - self.sade <= lahjapaketti.x + lahjapaketti.leveys
+                    and self.y + self.sade >= lahjapaketti.y
+                    and self.y - self.sade <= lahjapaketti.y + lahjapaketti.korkeus
+                ):
+                    self.putoaa = False
+                    self.laskeutunut = True
+
     def piirra(self, naytto):
         pygame.draw.circle(naytto, (255, 255, 255), (int(self.x), int(self.y)), self.sade)
+
+class Lahjapaketti:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.leveys = 40
+        self.korkeus = 40
+
+    def collider(self, hiutaleet):
+        for hiutale in hiutaleet:
+            if (
+                hiutale.x + hiutale.sade <= self.x
+                and hiutale.x - hiutale.sade <= self.x + self.leveys
+                and hiutale.y + hiutale.sade >= self.y
+                and hiutale.y - hiutale.sade <= self.y + self.korkeus
+                and hiutale.laskeutunut
+            ):
+                hiutale.putoaa = False
+                hiutale.laskeutunut = True
+        
+    def piirra(self, naytto):
+        pygame.draw.rect(naytto, (255, 0, 0), (self.x, self.y, self.leveys, self.korkeus))
+
 
 def kello_renderi(aika_jouluun):
     aikaa = ""
@@ -56,6 +89,8 @@ def kello_renderi(aika_jouluun):
 
 hiutaleet = []
 lumen_korkeus = [0] * KOKO[0]  # Pidä kirjaa lumen korkeudesta
+
+lahjapaketit = [Lahjapaketti(100, 500), Lahjapaketti(300, 500), Lahjapaketti(500, 500)]
 
 kello = pygame.time.Clock()
 maksimi_hiutaleet = 400  # Hiutaleiden maksimimäärä
@@ -78,17 +113,23 @@ while not valmis:
 
     poistettavat_hiutaleet = []
     for hiutale in hiutaleet:
-        hiutale.paivita(600, hiutaleet)
+        hiutale.paivita(600, hiutaleet, lahjapaketit)
         hiutale.piirra(naytto)
 
-        if hiutale.laskeutunut and 0 <= hiutale.x < KOKO[0]:
-            lumen_korkeus[int(hiutale.x)] += 1  # Kasvata lumen korkeutta
+        if hiutale.laskeutunut and hiutale.y >= 600:
+            x = int(hiutale.x)
+            if 0 <= x < KOKO[0]:
+                lumen_korkeus[x] += 1  # Kasvata lumen korkeutta
 
         if not hiutale.putoaa and hiutale.laskeutunut and (hiutale.x <= 0 or hiutale.x >= KOKO[0] or hiutale.y <= 0 or hiutale.y >= KOKO[1]):
             poistettavat_hiutaleet.append(hiutale)
 
     for hiutale in poistettavat_hiutaleet:
         hiutaleet.remove(hiutale)
+
+    for lahjapaketti in lahjapaketit:
+        lahjapaketti.collider(hiutaleet)
+        lahjapaketti.piirra(naytto)
 
     # Piirrä lumi maahan
     for x, korkeus in enumerate(lumen_korkeus):
