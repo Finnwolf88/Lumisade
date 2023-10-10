@@ -53,11 +53,12 @@ class Hiutale:
         pygame.draw.circle(naytto, (255, 255, 255), (int(self.x), int(self.y)), self.sade)
 
 class Lahjapaketti:
-    def __init__(self, x, y):
+    def __init__(self, kuvake, x, y):
+        self.kuva = pygame.image.load(kuvake)
         self.x = x
         self.y = y
-        self.leveys = 40
-        self.korkeus = 40
+        self.leveys = self.kuva.get_width()
+        self.korkeus = self.kuva.get_height()
 
     def collider(self, hiutaleet):
         for hiutale in hiutaleet:
@@ -72,7 +73,7 @@ class Lahjapaketti:
                 hiutale.laskeutunut = True
         
     def piirra(self, naytto):
-        pygame.draw.rect(naytto, (255, 0, 0), (self.x, self.y, self.leveys, self.korkeus))
+        naytto.blit(self.kuva, (self.x, self.y))
 
 
 def kello_renderi(aika_jouluun):
@@ -90,7 +91,11 @@ def kello_renderi(aika_jouluun):
 hiutaleet = []
 lumen_korkeus = [0] * KOKO[0]  # Pidä kirjaa lumen korkeudesta
 
-lahjapaketit = [Lahjapaketti(100, 500), Lahjapaketti(300, 500), Lahjapaketti(500, 500)]
+lahjapaketit = [Lahjapaketti("paketti1.png", 100, 572), Lahjapaketti("paketti2.png", 153, 572),
+                Lahjapaketti("paketti3.png", 207, 572), Lahjapaketti("paketti4.png", 260, 572),
+                Lahjapaketti("paketti5.png", 110, 543), Lahjapaketti("paketti4.png", 168, 543),
+                Lahjapaketti("paketti1.png", 245, 543), Lahjapaketti("paketti3.png", 141, 514),
+                Lahjapaketti("paketti4.png", 205, 514), Lahjapaketti("paketti2.png", 170, 485)]
 
 kello = pygame.time.Clock()
 maksimi_hiutaleet = 400  # Hiutaleiden maksimimäärä
