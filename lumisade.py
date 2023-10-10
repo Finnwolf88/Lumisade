@@ -11,7 +11,7 @@ class Hiutale:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.sade = 1
+        self.sade = 1 # Tarkoittaa lumihiutaleen sädettä
         self.y_nopeus = random.uniform(0.3, 0.9) # Putoamisnopeus
         self.x_nopeus = random.uniform(-0.1, 0.1) # Sivuttaisliike
         self.putoaa = True
@@ -39,6 +39,7 @@ class Hiutale:
                 self.putoaa = False
                 self.laskeutunut = True
 
+            # Tarkista osuuko lahjapakettiin
             for lahjapaketti in lahjapaketit:
                 if (
                     self.x + self.sade >= lahjapaketti.x
@@ -49,6 +50,7 @@ class Hiutale:
                     self.putoaa = False
                     self.laskeutunut = True
 
+    # Piirrä hiutale ruudulle
     def piirra(self, naytto):
         pygame.draw.circle(naytto, (255, 255, 255), (int(self.x), int(self.y)), self.sade)
 
@@ -57,25 +59,15 @@ class Lahjapaketti:
         self.kuva = pygame.image.load(kuvake)
         self.x = x
         self.y = y
+        # Otetaan paketin leveys ja korkeus kuvasta
         self.leveys = self.kuva.get_width()
         self.korkeus = self.kuva.get_height()
-
-    def collider(self, hiutaleet):
-        for hiutale in hiutaleet:
-            if (
-                hiutale.x + hiutale.sade <= self.x
-                and hiutale.x - hiutale.sade <= self.x + self.leveys
-                and hiutale.y + hiutale.sade >= self.y
-                and hiutale.y - hiutale.sade <= self.y + self.korkeus
-                and hiutale.laskeutunut
-            ):
-                hiutale.putoaa = False
-                hiutale.laskeutunut = True
         
+    # Piirrä paketti ruudulle
     def piirra(self, naytto):
         naytto.blit(self.kuva, (self.x, self.y))
 
-
+    # Joulukellon renderöinti
 def kello_renderi(aika_jouluun):
     aikaa = ""
     if aika_jouluun > 1:
@@ -133,7 +125,6 @@ while not valmis:
         hiutaleet.remove(hiutale)
 
     for lahjapaketti in lahjapaketit:
-        lahjapaketti.collider(hiutaleet)
         lahjapaketti.piirra(naytto)
 
     # Piirrä lumi maahan
